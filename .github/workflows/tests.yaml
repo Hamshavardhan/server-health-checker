@@ -23,7 +23,7 @@ jobs:
           "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
 
   server-health-check:
-    name: Server Checks - ${{ needs.generate-timestamp.outputs.timestamp }}
+    name: Health Check - ${{ needs.generate-timestamp.outputs.timestamp }}
     needs: generate-timestamp
     runs-on: windows-latest
 
