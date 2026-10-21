@@ -23,7 +23,7 @@ jobs:
           "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
 
   server-health-check:
-    name: Health Check - ${{ needs.generate-timestamp.outputs.timestamp }}
+    name: Server Checks - ${{ needs.generate-timestamp.outputs.timestamp }}
     needs: generate-timestamp
     runs-on: windows-latest
 
@@ -37,9 +37,31 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
+        shell: pwsh
         run: |
           python -m pip install --upgrade pip
           python -m pip install psutil pytest
 
       - name: Run automated tests
         run: python -m pytest -v
+
+      - name: Run Server Health Check
+        id: health
+        shell: pwsh
+        run: |
+          $report = python health_check.py
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Health checker failed."
+            exit 1
+          }
+
+          Write-Output $report
+
+          "## Server Health Report" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "**Run time:** $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          '```text' >> $env:GITHUB_STEP_SUMMARY
+          $report >> $env:GITHUB_STEP_SUMMARY
+          '```' >> $env:GITHUB_STEP_SUMMARY
