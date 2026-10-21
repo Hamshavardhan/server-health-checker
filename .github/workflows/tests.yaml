@@ -8,7 +8,23 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  generate-timestamp:
+    name: Generate Run Timestamp
+    runs-on: windows-latest
+    outputs:
+      timestamp: ${{ steps.time.outputs.timestamp }}
+
+    steps:
+      - name: Get current date and time
+        id: time
+        shell: pwsh
+        run: |
+          $timestamp = Get-Date -Format "yyyy-MM-dd HH-mm-ss"
+          "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
+
+  server-health-check:
+    name: Health Check - ${{ needs.generate-timestamp.outputs.timestamp }}
+    needs: generate-timestamp
     runs-on: windows-latest
 
     steps:
@@ -23,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
+          python -m pip install psutil pytest
 
       - name: Run automated tests
         run: python -m pytest -v
