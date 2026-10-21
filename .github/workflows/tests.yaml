@@ -49,7 +49,7 @@ jobs:
         id: health
         shell: pwsh
         run: |
-          $report = python health_check.py
+          $report = python Scripts/health_check.py
 
           if ($LASTEXITCODE -ne 0) {
             Write-Error "Health checker failed."
